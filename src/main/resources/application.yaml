@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: For_testdemo1
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/6_27_demo?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+server:
+  port: 70
