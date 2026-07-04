@@ -2,46 +2,61 @@ package com.example.for_testdemo1.Service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.for_testdemo1.Common.Result;
-import com.example.for_testdemo1.Dto.UserLoginDto;
 import com.example.for_testdemo1.Dto.UserRegisterDto;
 import com.example.for_testdemo1.Entity.UserEntity;
 import com.example.for_testdemo1.Mapper.UserMapper;
 import com.example.for_testdemo1.Service.UserService;
+import com.example.for_testdemo1.Vo.UserLoginVo;
+import com.example.for_testdemo1.Vo.UserVo;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> implements UserService {
     private final PasswordEncoder passwordEncoder;
-    public UserServiceImpl(PasswordEncoder passwordencoder){
+
+    public UserServiceImpl(PasswordEncoder passwordencoder) {
         this.passwordEncoder = passwordencoder;
     }
 
-    //为什么都是用反射注入，怎么不用构造方法或者setting注入
     @Override
-    public Result<UserEntity> register(UserRegisterDto dto) {
+    public Result<UserRegisterDto> userRegister(UserRegisterDto dto) {
         UserEntity exist = lambdaQuery().eq(UserEntity::getAccount, dto.getAccount()).one();
         if (exist != null) {
             return Result.error(400, "账号已存在");
         }
         UserEntity user = new UserEntity();
-        user.setAccount(dto.getAccount());
+        BeanUtils.copyProperties(dto,user);
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setName(dto.getName());
         save(user);
-        return Result.success(user);
+        UserRegisterDto result = new UserRegisterDto();
+        BeanUtils.copyProperties(user,result);
+        result.setPassword(null);
+        return Result.success(result);
     }
 
     @Override
-    public Result<String> login(UserLoginDto dto) {
-        UserEntity user = lambdaQuery().eq(UserEntity::getAccount, dto.getAccount()).one();
+    public Result<UserLoginVo> userLogin(UserLoginVo vo) {
+        UserEntity user = lambdaQuery().eq(UserEntity::getAccount, vo.getAccount()).one();
         if (user == null) {
             return Result.error(401, "账号或密码错误");
         }
-        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(vo.getPassword(), user.getPassword())) {
             return Result.error(401, "账号或密码错误");
         }
-        return Result.success("success");
+        UserLoginVo result = new UserLoginVo();
+        result.setAccount(user.getAccount());
+        result.setPassword("不给看");
+        return Result.success(result);
+    }
+    @Override
+    public Result<UserVo> userInfo(int id){
+        UserEntity user= getById(id);
+        if(user==null){return Result.error(400,"用户不存在");}
+        UserVo vo = new UserVo();
+        BeanUtils.copyProperties(user,vo);
+        return  Result.success(vo);
     }
 
 
