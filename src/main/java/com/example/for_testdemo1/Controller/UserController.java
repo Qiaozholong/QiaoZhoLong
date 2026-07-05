@@ -2,9 +2,12 @@ package com.example.for_testdemo1.Controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.for_testdemo1.Common.Result;
+import com.example.for_testdemo1.Dto.UserDto;
 import com.example.for_testdemo1.Dto.UserRegisterDto;
+import com.example.for_testdemo1.Dto.UserReset;
 import com.example.for_testdemo1.Entity.UserEntity;
 import com.example.for_testdemo1.Service.UserService;
+import com.example.for_testdemo1.Vo.UserDetailVo;
 import com.example.for_testdemo1.Vo.UserLoginVo;
 import com.example.for_testdemo1.Vo.UserVo;
 import org.springframework.beans.BeanUtils;
@@ -14,71 +17,72 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
+@RequestMapping("/users")
 public class UserController {
+    //构造方法注入
     private final UserService userService;
 
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
+    //注册接口
     @PostMapping("/register")
     public Result<UserRegisterDto> userregister(@RequestBody UserRegisterDto dto) {
         return userService.userRegister(dto);
     }
 
+    //登录接口
     @PostMapping("/login")
     public Result<UserLoginVo> UserLoginVo(@RequestBody UserLoginVo vo) {
         return userService.userLogin(vo);
     }
 
-    @GetMapping("/users")
-    public Result<List<UserVo>> list() {
-        List<UserEntity> entities = userService.list();
-        List<UserVo> vos = entities.stream()
-                .map(e -> {
-                    UserVo vo = new UserVo();
-                    BeanUtils.copyProperties(e, vo);
-                    return vo;
-                })
-                .collect(Collectors.toList());
-        return Result.success(vos);
+    //简要查询接口
+    @GetMapping("/getall")
+    public Result<List<UserVo>> getAll() {
+        return userService.userInfo();
     }
 
-    @GetMapping("/Test/{msg}")
-    public Result<String> test(@PathVariable String msg) {
-        return Result.unauthorized(msg);
+    //单独查询用户简要信息接口
+    @GetMapping("/{id}")
+    public Result<UserVo> getUserInfo(@PathVariable int id) {
+        return userService.userInfo(id);
     }
 
-    @GetMapping("/users/{id}")
-    public Result<UserVo> getUserById(@PathVariable int id) {
-        UserEntity user = userService.getById(id);
-        return user == null ? Result.error(404, "用户不存在") :userService.userInfo(id);
+    //单独查询用户详细信息接口
+    @GetMapping("/get/{id}")
+    public Result<UserEntity> getUserAllInfo(@PathVariable int id) {
+        return userService.userAllInfo(id);
     }
 
-    @GetMapping("/users/page")
-    public Result<Page<UserEntity>> Page(
-            @RequestParam(defaultValue = "1") int current,
-            @RequestParam(defaultValue = "10") int size) {
-        if (current <= 0 || size <= 0) {
-            return Result.error(400, "参数非法，请输入大于零的数");
-        }
-        return Result.success(userService.page(new Page<>(current, size)));
+    @GetMapping("/get")
+    public Result<List<UserDetailVo>> getUserAllInfo() {
+        return userService.userAllInfo();
     }
 
-    @PostMapping("/users")
-    public Result<UserEntity> addUser(@RequestBody UserEntity userEntity) {
-        userService.save(userEntity);
-        return Result.success(userEntity);
+    //分页接口
+    @GetMapping("/page")
+    public Result<Page<UserVo>> Page(@RequestParam(defaultValue = "1") int current) {
+        return userService.page(current);
     }
 
-    @PutMapping("/users/{id}")
-    public Result<UserEntity> updataUser(@PathVariable int id, @RequestBody UserEntity userEntity) {
-        userEntity.setId(id);
-        userService.updateById(userEntity);
-        return Result.success(userEntity);
+    //模糊查询接口
+    @GetMapping("/search")
+    public Result<List<UserDto>> userSearch(
+            @RequestParam String search) {
+        return userService.userSearch(search);
     }
 
-    @DeleteMapping("/users/{id}")
+    //重置密码接口
+    @PatchMapping("/reset/{id}")
+    public Result<UserReset> resetPassword(
+            @RequestBody UserReset Ur
+    ) {
+        return userService.ResetPassword(Ur);
+    }
+
+    @DeleteMapping("/{id}")
     public Result<UserEntity> deleteUser(@PathVariable int id) {
         UserEntity user = userService.getById(id);
         if (user != null) {
@@ -87,11 +91,11 @@ public class UserController {
         return user != null ? Result.success() : Result.error(404, "用户不存在");
     }
 
-    @PatchMapping("/users/{id}")
-    public Result<UserEntity> updateUser(@PathVariable int id, @RequestBody UserEntity userEntity) {
-        userEntity.setId(id);
-        userService.updateById(userEntity);
-        return Result.success(userEntity);
+
+    //字符返回测试接口
+    @GetMapping("/Test/{msg}")
+    public Result<String> test(@PathVariable String msg) {
+        return Result.unauthorized(msg);
     }
 
 }
