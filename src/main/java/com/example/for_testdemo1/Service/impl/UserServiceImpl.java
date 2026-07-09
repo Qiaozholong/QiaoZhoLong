@@ -5,10 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.for_testdemo1.Common.BusinessException;
 import com.example.for_testdemo1.Common.Result;
 import com.example.for_testdemo1.Config.JwtUtil;
-import com.example.for_testdemo1.Dto.LoginDto;
-import com.example.for_testdemo1.Dto.UserDto;
-import com.example.for_testdemo1.Dto.RegisterDto;
-import com.example.for_testdemo1.Dto.UserResetDto;
+import com.example.for_testdemo1.Dto.*;
 import com.example.for_testdemo1.Entity.UserEntity;
 import com.example.for_testdemo1.Mapper.UserMapper;
 import com.example.for_testdemo1.Service.UserService;
@@ -44,7 +41,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
         save(user);
         LoginResultVo result = new LoginResultVo();
         BeanUtils.copyProperties(user, result);
-        String token = jwtUtil.generateToken(user.getId(), user.getAccount(),user.getRole());
+        String token = jwtUtil.generateToken(user.getId(), user.getAccount(), user.getRole());
         result.setToken(token);
         return Result.success(result);
     }
@@ -58,7 +55,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
         if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
             throw new BusinessException(401, "账号或密码错误");
         }
-        String token = jwtUtil.generateToken(user.getId(), user.getAccount(),user.getRole());
+        String token = jwtUtil.generateToken(user.getId(), user.getAccount(), user.getRole());
         LoginResultVo vo = new LoginResultVo();
         BeanUtils.copyProperties(user, vo);
         vo.setToken(token);
@@ -163,6 +160,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
             return Result.success();
         }
         throw new BusinessException(400, "用户不存在");
+    }
+
+    @Override
+    public void getDetail(int userId) {
+        UserEntity user = getById(userId);
+        if (user.getGender() == null) {
+            System.out.println("性别未设置");;
+        }
+        if (user.getEmail() == null) {
+            System.out.println("邮件未设置");;
+        }
     }
 
 

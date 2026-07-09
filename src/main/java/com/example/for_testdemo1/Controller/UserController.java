@@ -3,10 +3,7 @@ package com.example.for_testdemo1.Controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.for_testdemo1.Common.BusinessException;
 import com.example.for_testdemo1.Common.Result;
-import com.example.for_testdemo1.Dto.LoginDto;
-import com.example.for_testdemo1.Dto.UserDto;
-import com.example.for_testdemo1.Dto.RegisterDto;
-import com.example.for_testdemo1.Dto.UserResetDto;
+import com.example.for_testdemo1.Dto.*;
 import com.example.for_testdemo1.Entity.UserEntity;
 import com.example.for_testdemo1.Service.UserService;
 import com.example.for_testdemo1.Vo.LoginResultVo;
@@ -36,13 +33,17 @@ public class UserController {
 
     //登录接口
     @PostMapping("/login")
-    public Result<LoginResultVo> UserLoginVo(@Valid@RequestBody LoginDto dto) {
+    public Result<LoginResultVo> UserLoginVo(@Valid @RequestBody LoginDto dto) {
         return userService.userLogin(dto);
     }
 
     //简要查询接口
     @GetMapping("/getall")
-    public Result<List<UserVo>> getAll() {
+    public Result<List<UserVo>> getAll(HttpServletRequest request) {
+        int role = (int) request.getAttribute("role");
+        if (role != 1) {
+            throw new BusinessException(403, "无权访问该数据信息");
+        }
         return userService.userInfo();
     }
 
@@ -53,7 +54,7 @@ public class UserController {
         int role = (int) request.getAttribute("role");
         if (role != 1) {
             if (id != userId) {
-                throw new BusinessException(403,"无权访问该数据信息");
+                throw new BusinessException(403, "无权访问该数据信息");
             }
         }
         return userService.userInfo(id);
@@ -66,14 +67,18 @@ public class UserController {
         int role = (int) request.getAttribute("role");
         if (role != 1) {
             if (id != userId) {
-                throw new BusinessException(403,"无权访问该数据信息");
+                throw new BusinessException(403, "无权访问该数据信息");
             }
         }
         return userService.userAllInfo(id);
     }
 
     @GetMapping("/get")
-    public Result<List<UserDetailVo>> getUserAllInfo() {
+    public Result<List<UserDetailVo>> getUserAllInfo(HttpServletRequest request) {
+        int role = (int) request.getAttribute("role");
+        if (role != 1) {
+            throw new BusinessException(403, "无权访问该数据信息");
+        }
         return userService.userAllInfo();
     }
 
@@ -86,7 +91,12 @@ public class UserController {
     //模糊查询接口
     @GetMapping("/search")
     public Result<List<UserDto>> userSearch(
-            @RequestParam String search) {
+            @RequestParam String search,
+            HttpServletRequest request) {
+        int userRole = (int) request.getAttribute("role");
+        if (userRole != 1) {
+            throw new BusinessException(403, "无权访问该数据信息");
+        }
         return userService.userSearch(search);
     }
 
@@ -97,9 +107,9 @@ public class UserController {
             @PathVariable int id,
             HttpServletRequest request
     ) {
-        int  userId = (int) request.getAttribute("userId");
-        if ( id!= userId) {
-            throw new BusinessException(403,"无权访问该数据信息");
+        int userId = (int) request.getAttribute("userId");
+        if (id != userId) {
+            throw new BusinessException(403, "无权访问该数据信息");
         }
         return userService.ResetPassword(Ur);
     }
@@ -111,9 +121,19 @@ public class UserController {
             HttpServletRequest request) {
         int userId = (int) request.getAttribute("userId");
         if (id != userId) {
-            throw new BusinessException(403,"无权访问该数据信息");
+            throw new BusinessException(403, "无权访问该数据信息");
         }
         return userService.deleteUser(id);
+    }
+
+    @PatchMapping("/setDetail")
+    public Void setDetail(@Valid @RequestBody PatchDto dto, HttpServletRequest request) {
+        int userId = (int) request.getAttribute("userId");
+        if (dto.getId() != userId) {
+            throw new BusinessException(403, "无权访问该数据信息");
+        }
+        userService.getDetail(userId);
+        throw new BusinessException(333, "测试");
     }
 
 
