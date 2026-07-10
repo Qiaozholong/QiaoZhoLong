@@ -126,14 +126,29 @@ public class UserController {
         return userService.deleteUser(id);
     }
 
-    @PatchMapping("/setDetail")
-    public Void setDetail(@Valid @RequestBody PatchDto dto, HttpServletRequest request) {
+    @GetMapping("/getDetail/{id}")
+    public String getDetail(@PathVariable int id, HttpServletRequest request) {
         int userId = (int) request.getAttribute("userId");
-        if (dto.getId() != userId) {
-            throw new BusinessException(403, "无权访问该数据信息");
+        int userRole = (int) request.getAttribute("role");
+        if (userRole != 1) {
+            if (id != userId) {
+                throw new BusinessException(403, "无权访问该数据信息");
+            }
         }
-        userService.getDetail(userId);
-        throw new BusinessException(333, "测试");
+        return userService.getDetail(id);
+    }
+
+    @PatchMapping("/setDetail/{id}")
+    public Result<Void> setDetail(@Valid @RequestBody PatchDto dto,@PathVariable int id, HttpServletRequest request) {
+        int userId = (int) request.getAttribute("userId");
+        int userRole = (int) request.getAttribute("role");
+        if (userRole != 1) {
+            if (id != userId) {
+                throw new BusinessException(403, "无权访问该数据信息");
+            }
+        }
+        userService.setDetail(dto,id);
+        return Result.success();
     }
 
 

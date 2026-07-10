@@ -12,10 +12,13 @@ import com.example.for_testdemo1.Service.UserService;
 import com.example.for_testdemo1.Vo.LoginResultVo;
 import com.example.for_testdemo1.Vo.UserDetailVo;
 import com.example.for_testdemo1.Vo.UserVo;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -161,16 +164,38 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
         }
         throw new BusinessException(400, "用户不存在");
     }
+    @Override
+    public String getDetail(int id) {
+        UserEntity user = getById(id);
+        if (user == null) {
+            throw new BusinessException(401,"用户不存在");
+        }
+        List<String> nullFields=new ArrayList<>();
+        for (Field field:UserEntity.class.getDeclaredFields()){
+            field.setAccessible(true);
+            try{
+                Object value=field.get(user);
+                if (value==null){
+                    nullFields.add(field.getName());
+                }
+            }catch (IllegalAccessException e){
+                throw new BusinessException(402,"字段访问异常");
+            }
+        }
+        if (nullFields.isEmpty()) {
+            return "信息完整";
+        }
+        return nullFields.stream()
+                .map(e->e+"未设置")
+                .collect(Collectors.joining(","));
+    }
 
     @Override
-    public void getDetail(int userId) {
-        UserEntity user = getById(userId);
-        if (user.getGender() == null) {
-            System.out.println("性别未设置");;
-        }
-        if (user.getEmail() == null) {
-            System.out.println("邮件未设置");;
-        }
+    public void setDetail(PatchDto dto,int id) {
+        UserEntity user = getById(id);
+        user.setEmail(dto.getEmail());
+        user.setGender(dto.getGender());
+        updateById(user);
     }
 
 

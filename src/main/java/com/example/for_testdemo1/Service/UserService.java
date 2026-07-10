@@ -41,6 +41,8 @@ public interface UserService extends IService<UserEntity> {
 
     //删除账户接口
     Result<Void> deleteUser(int id);
+    //查询未设置属性
+    String getDetail(int id);
     //查询用户未设置属性
-    void getDetail(int userId);
+    void setDetail(PatchDto dto,int id);
 }
