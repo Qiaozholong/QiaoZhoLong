@@ -24,7 +24,7 @@ public class ArticleController {
 
     //查询对应id编号文章
     @GetMapping("/getInfo/{id}")
-    public Result<ArticleEntity> getArticleInfo(@PathVariable int id) {
+    public Result<ArticleCreateVo> getArticleInfo(@PathVariable int id) {
         return articleService.getArticleInfoById(id);
     }
     //查询userid名下对应文章title
@@ -40,5 +40,13 @@ public class ArticleController {
         dto.setUserId(userId);
         return articleService.createArticle(dto,userId);
     }
+    //删除文章
+    @DeleteMapping("/delete/{id}")
+    public Result<Void> deleteArticle(@PathVariable int id,HttpServletRequest requset) {
+        int userId =(int)requset.getAttribute("userId");
+        int userRole = (int)requset.getAttribute("role");
+        return articleService.deleteArticle(id,userId,userRole);
+    }
+
 
 }
