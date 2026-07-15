@@ -1,5 +1,6 @@
 package com.example.for_testdemo1.Service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.for_testdemo1.Common.Result;
 import com.example.for_testdemo1.Dto.ArticleCreateDto;
@@ -18,4 +19,6 @@ public interface ArticleService extends IService<ArticleEntity> {
     Result<ArticleCreateVo> getArticleInfoById(int id);
     //article删除文章入口
     Result<Void> deleteArticle(int id,int userId,int userRole);
+    //article分页添加入口
+    Result<Page<ArticleVersionVo>> TurnPage(int current);
 }

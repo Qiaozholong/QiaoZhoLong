@@ -1,5 +1,6 @@
 package com.example.for_testdemo1.Controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.for_testdemo1.Common.Result;
 import com.example.for_testdemo1.Dto.ArticleCreateDto;
 import com.example.for_testdemo1.Entity.ArticleEntity;
@@ -46,6 +47,11 @@ public class ArticleController {
         int userId =(int)requset.getAttribute("userId");
         int userRole = (int)requset.getAttribute("role");
         return articleService.deleteArticle(id,userId,userRole);
+    }
+    //文章分页
+    @GetMapping("/page/{current}")
+    public Result<Page<ArticleVersionVo>>TurnPage(@PathVariable int current){
+        return articleService.TurnPage(current);
     }
 
 

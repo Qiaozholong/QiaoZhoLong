@@ -1,5 +1,6 @@
 package com.example.for_testdemo1.Service.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.for_testdemo1.Common.BusinessException;
 import com.example.for_testdemo1.Common.Result;
@@ -9,6 +10,7 @@ import com.example.for_testdemo1.Entity.UserEntity;
 import com.example.for_testdemo1.Mapper.ArticleMapper;
 import com.example.for_testdemo1.Mapper.UserMapper;
 import com.example.for_testdemo1.Service.ArticleService;
+import com.example.for_testdemo1.Util.RoleGetter_convertLIst;
 import com.example.for_testdemo1.Vo.ArticleCreateVo;
 import com.example.for_testdemo1.Vo.ArticleVersionVo;
 import org.springframework.beans.BeanUtils;
@@ -76,6 +78,14 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, ArticleEntity
         }
         removeById(id);
         return Result.success();
+    }
+
+    @Override
+    public Result<Page<ArticleVersionVo>> TurnPage(int current) {
+        Page<ArticleEntity> page = page(new Page<>(current, 5));
+        Page<ArticleVersionVo> pageVo = new Page<>(page.getCurrent(), page.getSize(), page.getTotal());
+        pageVo.setRecords(RoleGetter_convertLIst.convertList_A(page.getRecords(), ArticleVersionVo.class));
+        return Result.success(pageVo);
     }
 
 }

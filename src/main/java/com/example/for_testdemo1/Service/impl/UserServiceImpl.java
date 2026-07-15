@@ -9,7 +9,7 @@ import com.example.for_testdemo1.Dto.*;
 import com.example.for_testdemo1.Entity.UserEntity;
 import com.example.for_testdemo1.Mapper.UserMapper;
 import com.example.for_testdemo1.Service.UserService;
-import com.example.for_testdemo1.Util.ForUser;
+import com.example.for_testdemo1.Util.RoleGetter_convertLIst;
 import com.example.for_testdemo1.Vo.LoginResultVo;
 import com.example.for_testdemo1.Vo.UserDetailVo;
 import com.example.for_testdemo1.Vo.UserVo;
@@ -59,7 +59,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
     @Override
     public Result<LoginResultVo> userLogin(LoginDto dto) {
         UserEntity user = lambdaQuery().eq(UserEntity::getAccount, dto.getAccount()).one();
-        if (user == null && !passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+        if (user == null || !passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
             throw new BusinessException(401, "账号或密码错误");
         }
         String token = jwtUtil.generateToken(user.getId(), user.getAccount(), user.getRole());
@@ -83,7 +83,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
     @Override
     public Result<List<UserVo>> userInfo() {
         List<UserEntity> Ue = list();
-        List<UserVo> vo = ForUser.convertList(Ue, UserVo.class);
+        List<UserVo> vo = RoleGetter_convertLIst.convertList_U(Ue, UserVo.class);
         return Result.success(vo);
     }
 
@@ -100,7 +100,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
     @Override
     public Result<List<UserDetailVo>> userAllInfo() {
         List<UserEntity> Ue = list();
-        List<UserDetailVo> vo = ForUser.convertList(Ue, UserDetailVo.class);
+        List<UserDetailVo> vo = RoleGetter_convertLIst.convertList_U(Ue, UserDetailVo.class);
         return Result.success(vo);
     }
 
@@ -108,13 +108,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
     public Result<Page<UserVo>> page(int current) {
         Page<UserEntity> entityPage = page(new Page<>(current, 10));
         Page<UserVo> voPage = new Page<>(entityPage.getCurrent(), entityPage.getSize(), entityPage.getTotal());
-        voPage.setRecords(entityPage.getRecords().stream().map(element -> {
-            UserVo v = new UserVo();
-            BeanUtils.copyProperties(element, v);
-            return v;
-        }).collect(Collectors.toList()));
+        voPage.setRecords(RoleGetter_convertLIst.convertList_U(entityPage.getRecords(), UserVo.class));
         return Result.success(voPage);
-
     }
 
     @Override
@@ -135,7 +130,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
     @Override
     public Result<UserResetDto> ResetPassword(UserResetDto Ur) {
         UserEntity user = lambdaQuery().eq(UserEntity::getAccount, Ur.getAccount()).one();
-        if (user == null && !passwordEncoder.matches(Ur.getPassword(), user.getPassword())) {
+        if (user == null || !passwordEncoder.matches(Ur.getPassword(), user.getPassword())) {
             throw new BusinessException(402, "用户名或密码错误");
         }
         String encodePwd = passwordEncoder.encode(Ur.getNewone());
@@ -178,7 +173,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
             return "信息完整";
         }
         return nullFields.stream()
-                .map(e -> FIELD_CN.getOrDefault(e, e)+ "未设置")
+                .map(e -> FIELD_CN.getOrDefault(e, e) + "未设置")
                 .collect(Collectors.joining(",\n"));
     }
 
