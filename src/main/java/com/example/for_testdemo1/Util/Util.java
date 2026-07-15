@@ -9,7 +9,7 @@ import org.springframework.beans.BeanUtils;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class RoleGetter_convertLIst {
+public class Util {
     //查询jwt令牌中的user,role字段判断权限
     public static void checkPermission(HttpServletRequest request, int id) {
         int userId = (int) request.getAttribute("userId");

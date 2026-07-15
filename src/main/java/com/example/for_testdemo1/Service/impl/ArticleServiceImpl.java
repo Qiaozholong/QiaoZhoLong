@@ -5,14 +5,16 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.for_testdemo1.Common.BusinessException;
 import com.example.for_testdemo1.Common.Result;
 import com.example.for_testdemo1.Dto.ArticleCreateDto;
+import com.example.for_testdemo1.Dto.ResetArticleDto;
 import com.example.for_testdemo1.Entity.ArticleEntity;
 import com.example.for_testdemo1.Entity.UserEntity;
 import com.example.for_testdemo1.Mapper.ArticleMapper;
 import com.example.for_testdemo1.Mapper.UserMapper;
 import com.example.for_testdemo1.Service.ArticleService;
-import com.example.for_testdemo1.Util.RoleGetter_convertLIst;
+import com.example.for_testdemo1.Util.Util;
 import com.example.for_testdemo1.Vo.ArticleCreateVo;
 import com.example.for_testdemo1.Vo.ArticleVersionVo;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -58,12 +60,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, ArticleEntity
         List<ArticleEntity> AE = lambdaQuery()
                 .eq(ArticleEntity::getUserId, id)
                 .list();
-        List<ArticleVersionVo> vos = AE.stream()
-                .map(e -> {
-                    ArticleVersionVo vo = new ArticleVersionVo();
-                    BeanUtils.copyProperties(e, vo);
-                    return vo;
-                }).collect(Collectors.toList());
+        List<ArticleVersionVo> vos = Util.convertList_A(AE, ArticleVersionVo.class);
         return Result.success(vos);
     }
 
@@ -84,8 +81,33 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, ArticleEntity
     public Result<Page<ArticleVersionVo>> TurnPage(int current) {
         Page<ArticleEntity> page = page(new Page<>(current, 5));
         Page<ArticleVersionVo> pageVo = new Page<>(page.getCurrent(), page.getSize(), page.getTotal());
-        pageVo.setRecords(RoleGetter_convertLIst.convertList_A(page.getRecords(), ArticleVersionVo.class));
+        pageVo.setRecords(Util.convertList_A(page.getRecords(), ArticleVersionVo.class));
         return Result.success(pageVo);
+    }
+
+    @Override
+    public Result<ArticleCreateVo> ResetArticle(ResetArticleDto dto, int articleId, int userId, int userRole) {
+        ArticleEntity articleEntity = getById(articleId);
+        if (articleEntity == null) {
+            throw new BusinessException(400, "文章不存在");
+        }
+        if (userRole != 1 && articleEntity.getUserId() != userId) {
+            throw new BusinessException(403, "无权编辑此文章");
+        }
+
+        if (dto.getTitle() != null) {
+            articleEntity.setTitle(dto.getTitle());
+        }
+        if (dto.getContent() != null) {
+            articleEntity.setContent(dto.getContent());
+        }
+        updateById(articleEntity);
+        ArticleEntity AE = getById(articleEntity.getId());
+        ArticleCreateVo vo = new ArticleCreateVo();
+        BeanUtils.copyProperties(AE, vo);
+        vo.setAuthorName(userMapper.selectById(AE.getUserId()).getName());
+        return Result.success(vo);
+
     }
 
 }

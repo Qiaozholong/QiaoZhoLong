@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.for_testdemo1.Common.Result;
 import com.example.for_testdemo1.Dto.ArticleCreateDto;
+import com.example.for_testdemo1.Dto.ResetArticleDto;
 import com.example.for_testdemo1.Entity.ArticleEntity;
 import com.example.for_testdemo1.Vo.ArticleCreateVo;
 import com.example.for_testdemo1.Vo.ArticleVersionVo;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 
@@ -21,4 +23,6 @@ public interface ArticleService extends IService<ArticleEntity> {
     Result<Void> deleteArticle(int id,int userId,int userRole);
     //article分页添加入口
     Result<Page<ArticleVersionVo>> TurnPage(int current);
+    //article文章编辑入口
+    Result<ArticleCreateVo> ResetArticle(ResetArticleDto dto, int articleId,int userId,int userRole);
 }

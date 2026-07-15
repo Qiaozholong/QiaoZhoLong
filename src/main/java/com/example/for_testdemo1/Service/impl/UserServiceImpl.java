@@ -9,7 +9,7 @@ import com.example.for_testdemo1.Dto.*;
 import com.example.for_testdemo1.Entity.UserEntity;
 import com.example.for_testdemo1.Mapper.UserMapper;
 import com.example.for_testdemo1.Service.UserService;
-import com.example.for_testdemo1.Util.RoleGetter_convertLIst;
+import com.example.for_testdemo1.Util.Util;
 import com.example.for_testdemo1.Vo.LoginResultVo;
 import com.example.for_testdemo1.Vo.UserDetailVo;
 import com.example.for_testdemo1.Vo.UserVo;
@@ -83,7 +83,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
     @Override
     public Result<List<UserVo>> userInfo() {
         List<UserEntity> Ue = list();
-        List<UserVo> vo = RoleGetter_convertLIst.convertList_U(Ue, UserVo.class);
+        List<UserVo> vo = Util.convertList_U(Ue, UserVo.class);
         return Result.success(vo);
     }
 
@@ -100,7 +100,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
     @Override
     public Result<List<UserDetailVo>> userAllInfo() {
         List<UserEntity> Ue = list();
-        List<UserDetailVo> vo = RoleGetter_convertLIst.convertList_U(Ue, UserDetailVo.class);
+        List<UserDetailVo> vo = Util.convertList_U(Ue, UserDetailVo.class);
         return Result.success(vo);
     }
 
@@ -108,7 +108,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
     public Result<Page<UserVo>> page(int current) {
         Page<UserEntity> entityPage = page(new Page<>(current, 10));
         Page<UserVo> voPage = new Page<>(entityPage.getCurrent(), entityPage.getSize(), entityPage.getTotal());
-        voPage.setRecords(RoleGetter_convertLIst.convertList_U(entityPage.getRecords(), UserVo.class));
+        voPage.setRecords(Util.convertList_U(entityPage.getRecords(), UserVo.class));
         return Result.success(voPage);
     }
 
